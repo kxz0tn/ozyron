@@ -4,6 +4,8 @@ A black and white futuristic city in 3D, running in the browser.
 
 **Live:** https://kxz0tn.github.io/ozyron/
 
+![Ozyron skyline](shots/01-skyline.jpg)
+
 ## Features
 
 - **Boot terminal** — the city comes online system by system before the flyover. Press any key or tap to skip.
@@ -13,6 +15,13 @@ A black and white futuristic city in 3D, running in the browser.
 - **Transit** — flying traffic lanes, ground streets with moving light, and ships launching and landing.
 - **Atmosphere** — fog, haze layers, wet reflective ground, bloom and a strict greyscale grade.
 - Everything (geometry, textures, signage) is generated procedurally in code. No external fonts, images or network requests.
+
+| | |
+|---|---|
+| ![Shipyard](shots/02-shipyard.jpg) | ![Energy beam](shots/10-beam-closeup.jpg) |
+| ![Orbital collectors](shots/11-orbital-collectors.jpg) | ![Skyline](shots/16-skyline-low-angle.jpg) |
+
+![Boot](shots/boot-4-ozyron-online.jpg)
 
 ## Controls
 
