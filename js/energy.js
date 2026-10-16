@@ -47,7 +47,8 @@ export function buildEnergy(scene,{conduits=10,reach=480}={}){
     for(let j=0;j<4;j++){const m=new THREE.Mesh(pulseG,white);g.add(m);pulses.push({m,c,o:j/4+i*0.13});}
   }
   const light=new THREE.PointLight(0xffffff,4,600,1.2);light.position.y=80;g.add(light);
-  return {group:g,update(t){beamMat.uniforms.t.value=t;orbit.rotation.y=t*0.03;rt.offset.x=-t*0.05;nav.forEach((m,i)=>m.visible=((Math.floor(t*4)+i)%6)<2);rings[1].rotation.z=t*0.1;rings[2].rotation.z=-t*0.06;
+  const fx={wob:0};
+  return {group:g,orbit,beam,beamMat,light,rings,fx,update(t){beamMat.uniforms.t.value=t;beam.position.x=Math.sin(t*37)*fx.wob*6;beam.position.z=Math.cos(t*29)*fx.wob*6;beam.scale.x=beam.scale.z=1+fx.wob*0.6*Math.sin(t*50);orbit.rotation.y=t*0.03;rt.offset.x=-t*0.05;nav.forEach((m,i)=>m.visible=((Math.floor(t*4)+i)%6)<2);rings[1].rotation.z=t*0.1;rings[2].rotation.z=-t*0.06;
     for(let i=0;i<10;i++){const u=((i/10)+t*0.05)%1,m=bRings[i];m.position.y=40+u*520;m.material.opacity=Math.sin(u*Math.PI)*0.8;m.scale.setScalar(1+Math.sin(t*2+i)*0.15);}
     for(let i=0;i<HN;i++){const u=((i/HN)+t*0.03)%1,a=u*90+t*1.5+(i%2)*Math.PI;hp[i*3]=Math.cos(a)*14;hp[i*3+1]=40+u*520;hp[i*3+2]=Math.sin(a)*14;}hg.attributes.position.needsUpdate=true;
     light.intensity=3.5+Math.sin(t*3)*0.8;

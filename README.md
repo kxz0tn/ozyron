@@ -1,75 +1,71 @@
 # Ozyron
 
-A black and white futuristic city in 3D, running in the browser.
+**[Launch Ozyron →](https://kxz0tn.github.io/ozyron/)**
 
-**Live:** https://kxz0tn.github.io/ozyron/
+Ozyron is a real-time 3D cyberpunk city that runs in the browser. Megatowers, sky rail, drones, an orbital energy ring, rain on wet streets and a full day/night cycle — all generated in code. The city hosts a small set of games built on a shared rhythm engine.
 
-![Ozyron skyline](shots/01-skyline.jpg)
+![Ozyron skyline](shots/skyline.jpg)
 
-## Features
+## Games
 
-- **Boot terminal** — the city comes online system by system before the flyover. Press any key or tap to skip.
-- **Megatowers** — dense, varied tower architecture with lit windows, skybridges and rooftop landing pads.
-- **Spaceship factory** — gantries with cross-bracing, a ship under construction on a cradle, and jointed robot arms welding with sparks.
-- **Space energy system** — a reactor core, a beam to an orbital collector ring, and glowing conduits feeding the city.
-- **Transit** — flying traffic lanes, ground streets with moving light, and ships launching and landing.
-- **Atmosphere** — fog, haze layers, wet reflective ground, bloom and a strict greyscale grade.
-- Everything (geometry, textures, signage) is generated procedurally in code. No external fonts, images or network requests.
+### Beam Keeper
+Keep the city's energy beam locked on the orbital ring. Rotate to aim at incoming collectors and fire on the beat. Misses drain grid integrity and darken whole sectors of the skyline. Survive four waves and the boss surge.
 
-| | |
-|---|---|
-| ![Shipyard](shots/02-shipyard.jpg) | ![Energy beam](shots/10-beam-closeup.jpg) |
-| ![Orbital collectors](shots/11-orbital-collectors.jpg) | ![Skyline](shots/16-skyline-low-angle.jpg) |
+![Beam Keeper](shots/beam-keeper.jpg)
 
-![Boot](shots/boot-4-ozyron-online.jpg)
+### Shipyard Builder
+Run the orbital shipyard's assembly line. Parts arrive on the belt in time with the music; weld each one into place on the beat, avoid wrong parts, then nail the countdown to launch the finished ship through the ring. Clean runs unlock larger ship classes.
+
+![Shipyard launch](shots/shipyard-launch.jpg)
+
+### Explore and Photo
+Fly freely around the city, or use photo mode with camera presets to frame your own shots.
 
 ## Controls
 
-| Input | Action |
-|---|---|
-| (none) | Slow cinematic flyover |
-| Mouse drag / one finger | Orbit |
-| Scroll / pinch | Zoom |
-| Right-drag / two fingers | Pan |
-| W A S D / arrow keys | Fly |
-| E or Space / Q | Up / down |
-| Shift | Faster |
-| C | Toggle the flyover |
+| Action | Keyboard | Gamepad | Touch |
+| --- | --- | --- | --- |
+| Rotate / aim | A / D, ← / → | left stick, d-pad | drag |
+| Fire / weld / launch | Space, Enter | A | fire button |
+| Pause | Esc, P | Start | menu button |
+| Restart | R | Y | pause menu |
 
-Any input takes manual control. The flyover resumes after 45 seconds idle.
+Every key can be remapped in **settings**. Input is timestamped and judged against the audio clock, with input buffering, a short coyote window on aim, and a latency calibration tool so timing feels right on any device. Each game has a short tutorial on first play.
 
-## Run locally
+## Quality tiers
 
-It is a static site with no build step:
+The tier is picked automatically from your device and can be changed in settings, or forced with `?q=low|med|high|ultra`.
 
-```sh
-python3 -m http.server 8000
-# open http://localhost:8000
+| Tier | What you get |
+| --- | --- |
+| low | lean city for phones and older laptops: no bloom, light rain, no reflections |
+| med | bloom, light shafts, denser city and traffic |
+| high | soft shadows, wet-street reflections, volumetric light |
+| ultra | maximum density, full-resolution volumetrics |
+
+## Running locally
+
+No build step. Serve the folder with any static server:
+
 ```
+python3 -m http.server 8000
+```
+
+then open http://localhost:8000. `?mode=beamkeeper|shipyard|explore|photo` jumps straight into a module.
 
 ## Structure
 
-```
-index.html          entry, import map
-css/boot.css        boot terminal styles
-js/boot.js          boot terminal sequence
-js/main.js          renderer, post-processing, district list
-js/world.js         sky, stars, ground, fog
-js/towers.js        megatower district
-js/details.js       skybridges, pads, streets, signage, haze
-js/energy.js        reactor, beam, orbital ring, conduits
-js/shipyard.js      spaceship factory
-js/traffic.js       air lanes and ship flights
-js/camera.js        flyover and free-fly controls
-vendor/             three.js r160 (MIT)
-```
+- `js/core/` — settings and tiers, module registry, input, WebAudio synth and music, rhythm clock, camera rig, ui
+- `js/city/` — day/night, atmosphere, transit, signs, rain, docks, energy effects
+- `js/games/` — Beam Keeper, Shipyard Builder
+- `js/modes/` — explore, photo
 
-To add a district, write a module that returns `{ update(t, dt) }` and add it to the `systems` list in `js/main.js`.
+New games register themselves through `js/core/registry.js` and appear in the menu automatically.
 
 ## Credits
 
-Built by kxz0tn. Uses [three.js](https://threejs.org) (MIT, © 2010-2023 three.js authors); see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Design and code by **kxz0tn**. All geometry, textures, shaders, music and sound effects are original and generated at runtime. The only third-party code is [three.js](https://threejs.org) (MIT) — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-## License
+## Licence
 
 [MIT](LICENSE) © 2026 kxz0tn

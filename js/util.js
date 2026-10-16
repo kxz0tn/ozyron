@@ -1,4 +1,4 @@
-// shared helpers: seeded rng + greyscale canvas textures
+// shared helpers: seeded rng + tonal canvas textures
 export function rng(seed=1){let s=seed>>>0;return()=>((s=Math.imul(s^s>>>15,1|s)+0x6D2B79F5|0,(s^s>>>7)>>>0)/4294967296);}
 export function windowTexture(seed=7,w=128,h=512){
   const r=rng(seed),c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');

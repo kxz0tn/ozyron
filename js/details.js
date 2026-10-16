@@ -9,7 +9,9 @@ export function buildDetails(scene,towers,{seed=11}={}){
   const bridges=new THREE.InstancedMesh(new THREE.BoxGeometry(1,2.2,3),metal,900),strips=new THREE.InstancedMesh(new THREE.BoxGeometry(1,0.25,0.25),white,900);
   bridges.count=strips.count=0;
   for(let i=0;i<towers.length;i++)for(let j=i+1;j<towers.length&&bridges.count<899;j++){const a=towers[i],b=towers[j],d=Math.hypot(a.x-b.x,a.z-b.z);
-    if(d<14||d>55||r()>0.35)continue;const top=Math.min(a.h,b.h)*0.85;if(top<30)continue;
+    if(d<14||d>55||r()>0.35)continue;
+    // keep the trailer street corridor (road z=-220, west side) clear of bridges
+    if(Math.min(a.x,b.x)<-240&&(a.z+220)*(b.z+220)<0)continue;const top=Math.min(a.h,b.h)*0.85;if(top<30)continue;
     for(let y=25+r()*15;y<top&&bridges.count<899;y+=40+r()*50){o.position.set((a.x+b.x)/2,y,(a.z+b.z)/2);o.rotation.set(0,-Math.atan2(b.z-a.z,b.x-a.x),0);o.scale.set(d,1,1);o.updateMatrix();
       bridges.setMatrixAt(bridges.count++,o.matrix);o.position.y-=1.2;o.updateMatrix();strips.setMatrixAt(strips.count++,o.matrix);}}
   g.add(bridges,strips);

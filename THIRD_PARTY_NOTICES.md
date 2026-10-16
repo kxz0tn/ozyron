@@ -1,32 +1,18 @@
 # Third-party notices
 
-Ozyron bundles the following third-party software in `vendor/`.
+Ozyron v2 ships one third-party library. Everything else (code, geometry, textures, shaders, music, sound) is original and generated in code at runtime.
 
-## three.js r160
+## three.js r160 (MIT)
+Copyright 2010-2023 three.js authors. Full licence text: `vendor/LICENSE-three.txt`.
+Files used, unmodified from the r160 release:
+- `vendor/three.module.js`
+- `vendor/jsm/controls/OrbitControls.js`
+- `vendor/jsm/postprocessing/EffectComposer.js`, `RenderPass.js`, `ShaderPass.js`, `MaskPass.js`, `Pass.js`, `UnrealBloomPass.js`, `OutputPass.js`
+- `vendor/jsm/shaders/CopyShader.js`, `LuminosityHighPassShader.js`, `OutputShader.js`
+- `vendor/jsm/objects/Reflector.js` (added in v2, wet-street reflections)
 
-Files: `vendor/three.module.js`, `vendor/jsm/**` (OrbitControls, EffectComposer, RenderPass, ShaderPass, MaskPass, Pass, UnrealBloomPass, OutputPass, CopyShader, LuminosityHighPassShader, OutputShader).
-Source: https://github.com/mrdoob/three.js — unmodified.
+## Fonts
+None bundled. UI uses the device's own monospace font stack (`ui-monospace`, Menlo, Consolas, ...).
 
-```
-The MIT License
-
-Copyright © 2010-2023 three.js authors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-```
+## Audio
+None bundled. All ambient sound, music and effects are synthesised live with the WebAudio API (`js/core/audio.js`).

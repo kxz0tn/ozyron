@@ -1,6 +1,7 @@
 import * as THREE from 'three';
+import {rng,pointCloud} from './particles.js';
 // spaceship factory: dock, gantries, ship under construction, articulated assembly arms with weld sparks
-function shipHull(metal,white){
+export function shipHull(metal,white){
   const s=new THREE.Group();
   const prof=[];for(let i=0;i<=20;i++){const u=i/20;prof.push(new THREE.Vector2(Math.sin(u*Math.PI)**0.6*9*(1-u*0.35)+0.3,u*110-55));}
   const hull=new THREE.Mesh(new THREE.LatheGeometry(prof,24),metal);hull.rotation.z=Math.PI/2;s.add(hull);
@@ -62,9 +63,11 @@ export function buildShipyard(scene,{x=330,z=-120}={}){
   const ship=shipHull(metal,white);ship.position.y=40;g.add(ship);
   // arms
   const arms=[],sparks=[];
-  const sparkG=new THREE.BufferGeometry();const SN=400;sparkG.setAttribute('position',new THREE.BufferAttribute(new Float32Array(SN*3),3));
-  const sparkPts=new THREE.Points(sparkG,new THREE.PointsMaterial({color:0xffffff,size:2.2,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));g.add(sparkPts);
-  const sv=[];for(let i=0;i<SN;i++)sv.push({p:new THREE.Vector3(),v:new THREE.Vector3(),life:0});
+  // sparks: real particle system. tiny additive points + short motion-blur streaks, velocity, gravity, bounce, short life, fading
+  const R=rng(9137),SN=2400,sp=pointCloud(SN,{additive:true,soft:3.0});g.add(sp.pts);
+  const streakG=new THREE.BufferGeometry();streakG.setAttribute('position',new THREE.BufferAttribute(new Float32Array(SN*6),3));streakG.setAttribute('color',new THREE.BufferAttribute(new Float32Array(SN*6),3));
+  const streaks=new THREE.LineSegments(streakG,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,depthWrite:false}));streaks.frustumCulled=false;g.add(streaks);
+  const glowM=new THREE.SpriteMaterial({map:(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d'),gr=x.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(0.15,'rgba(255,255,255,0.55)');gr.addColorStop(0.5,'rgba(255,255,255,0.08)');gr.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=gr;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);})(),blending:THREE.AdditiveBlending,depthWrite:false,transparent:true});
   for(let i=0;i<6;i++){const side=i%2?1:-1,ax=-30+Math.floor(i/2)*30;
     const base=new THREE.Group();base.position.set(ax,4,side*40);g.add(base);
     base.add(new THREE.Mesh(new THREE.CylinderGeometry(4,5,4,16),dark));
@@ -81,22 +84,30 @@ export function buildShipyard(scene,{x=330,z=-120}={}){
     const wrist=new THREE.Group();wrist.position.y=22;s2.add(wrist);
     wrist.add(new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.1,3,12),jm));
     [-1,1].forEach(k=>{const f=new THREE.Mesh(new THREE.BoxGeometry(0.5,3.5,0.8),metal);f.position.set(k*0.9,2.6,0);f.rotation.z=k*0.35;wrist.add(f);});
-    const tip=new THREE.Mesh(new THREE.SphereGeometry(0.7,8,6),white);tip.position.y=26.5;s2.add(tip);
+    const tip=new THREE.Mesh(new THREE.SphereGeometry(0.22,8,6),white);tip.position.y=26.5;s2.add(tip);const glow=new THREE.Sprite(glowM.clone());glow.scale.setScalar(2.2);tip.add(glow);
     const pl=new THREE.PointLight(0xffffff,0,40,2);tip.add(pl);
-    arms.push({base,s1,s2,tip,pl,side,ph:i*1.3});}
+    arms.push({base,s1,s2,tip,pl,glow,side,ph:i*1.3,acc:0});}
   // launch tower lights
   const beacons=[];for(let i=-2;i<=2;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(1.4,8,6),white);b.position.set(i*40,97,0);g.add(b);beacons.push(b);}
   const wp=new THREE.Vector3();let si=0;
-  return {group:g,update(t,dt){
+  return {group:g,ship,update(t,dt){
     trolley.position.x=Math.sin(t*0.15)*80;
     ship.rotation.x=Math.sin(t*0.1)*0.02;
     for(const a of arms){a.base.rotation.y=a.side>0?Math.PI:0;a.base.rotation.y+=Math.sin(t*0.4+a.ph)*0.5;
       a.s1.rotation.x=0.55+Math.sin(t*0.7+a.ph)*0.15;a.s2.rotation.x=0.9+Math.sin(t*0.9+a.ph)*0.25;
-      const on=Math.sin(t*2.3+a.ph*3)>0.2;a.pl.intensity=on?(1.5+Math.random()*2.5):0;a.tip.scale.setScalar(on?1.6:0.7);
-      if(on){a.tip.getWorldPosition(wp);g.worldToLocal(wp);for(let k=0;k<7;k++){const s=sv[si++%SN];s.p.copy(wp);s.v.set((Math.random()-.5)*20,Math.random()*12,(Math.random()-.5)*20);s.life=0.6+Math.random()*0.5;}}}
-    const arr=sparkG.attributes.position.array;
-    sv.forEach((s,i)=>{if(s.life>0){s.life-=dt;s.v.y-=30*dt;s.p.addScaledVector(s.v,dt);}else s.p.set(0,-999,0);arr[i*3]=s.p.x;arr[i*3+1]=s.p.y;arr[i*3+2]=s.p.z;});
-    sparkG.attributes.position.needsUpdate=true;
+      const on=Math.sin(t*2.3+a.ph*3)>-0.45,fl=0.55+0.45*R();
+      a.pl.intensity=on?1.2+1.2*fl:0;a.glow.visible=on;a.glow.material.opacity=0.35+0.5*fl;a.glow.scale.setScalar(1.4+1.4*fl);a.tip.visible=on;
+      if(on&&dt>0){a.tip.getWorldPosition(wp);g.worldToLocal(wp);a.acc+=dt*2400*(0.6+0.8*R()); // ~2400 sparks/s per arm, bursty
+        while(a.acc>=1){a.acc-=1;const q=sp.spawn(),th=R()*Math.PI*2,ph=Math.acos(1-2*R()*0.85),spd=8+R()*R()*38;
+          q.p.copy(wp);q.v.set(Math.sin(ph)*Math.cos(th)*spd,Math.cos(ph)*spd*0.8+4,Math.sin(ph)*Math.sin(th)*spd);
+          q.p.addScaledVector(q.v,R()*dt);q.l0=q.life=0.25+R()*R()*0.8;q.s0=0.12+R()*0.14;q.lum=1;q.a0=0.85+R()*0.15;}}}
+    const floorY=4.2,sa=streakG.attributes.position.array,sc=streakG.attributes.color.array;let si2=0;
+    sp.P.forEach((q,i)=>{if(q.life>0){q.life-=dt;q.v.y-=38*dt;q.v.multiplyScalar(Math.max(0,1-1.2*dt));q.p.addScaledVector(q.v,dt);if(q.p.y<floorY&&q.v.y<0){q.p.y=floorY;q.v.y*=-0.3;q.v.x*=0.6;q.v.z*=0.6;}}
+      const j=i*6;if(q.life>0){const k=1-q.life/q.l0,b=(1-k)*q.a0,L=0.04; // streak = distance covered in ~1/45 s (shutter)
+        sa[j]=q.p.x;sa[j+1]=q.p.y;sa[j+2]=q.p.z;sa[j+3]=q.p.x-q.v.x*L;sa[j+4]=q.p.y-q.v.y*L;sa[j+5]=q.p.z-q.v.z*L;
+        sc[j]=sc[j+1]=sc[j+2]=1.3*b;sc[j+3]=sc[j+4]=sc[j+5]=0;}else{sa[j+1]=sa[j+4]=-9999;sc[j]=sc[j+1]=sc[j+2]=0;}});
+    streakG.attributes.position.needsUpdate=streakG.attributes.color.needsUpdate=true;
+    sp.write((q,k)=>[q.s0*(1-0.5*k),(1-k)*q.a0]);
     beacons.forEach((b,i)=>b.visible=Math.sin(t*3-i)>0);
   }};
 }
