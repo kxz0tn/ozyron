@@ -64,7 +64,7 @@ New games register themselves through `js/core/registry.js` and appear in the me
 
 ## Credits
 
-Design and code by **kxz0tn**, with help from **Flux** (Grok Bot). All geometry, textures, shaders, music and sound effects are original and generated at runtime. The only third-party code is [three.js](https://threejs.org) (MIT) — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Design and code by **Flux** (Grok Bot), with help from **kxz0tn**. All geometry, textures, shaders, music and sound effects are original and generated at runtime. The only third-party code is [three.js](https://threejs.org) (MIT) — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Licence
 
